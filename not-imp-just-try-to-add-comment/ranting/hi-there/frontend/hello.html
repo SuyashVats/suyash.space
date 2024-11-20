@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment Section</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            color: #ffffff;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #333;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #444;
+        }
+        .comments-section {
+            margin-top: 30px;
+        }
+        .comment {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .comment img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .comment-content {
+            flex-grow: 1;
+        }
+        .comment-content strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Add a hidden input for postId -->
+<input type="hidden" id="postId" value="2">  <!-- Use the actual postId here -->
+
+        <h1>Leave a thought</h1>
+        <label for="name">Name</label>
+        <input type="text" id="name" placeholder="Name">
+        
+        <label for="message">Comment</label>
+        <textarea id="message" placeholder="Type a comment"></textarea>
+        
+        <button onclick="postComment()">Post Comment</button>
+
+        <div class="comments-section">
+            <h2>Comments (<span id="comment-count">0</span>)</h2>
+            <div id="comments">
+                <!-- Comments will be loaded here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function postComment() {
+    const name = document.getElementById('name').value;
+    const message = document.getElementById('message').value;
+    const postId = document.getElementById('postId').value;
+
+    if (name && message) {
+        // Send the comment to the backend
+        const response = await fetch('http://localhost:5000/comments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, message, postId })
+        });
+
+        if (response.ok) {
+            // If the comment was saved successfully, display it
+            const newCommentData = await response.json();
+            displayComment(newCommentData);
+            
+            // Clear input fields
+            document.getElementById('name').value = '';
+            document.getElementById('message').value = '';
+
+            // Update comment count
+            const commentCount = document.getElementById('comment-count');
+            commentCount.textContent = parseInt(commentCount.textContent) + 1;
+        } else {
+            alert('Error posting comment.');
+        }
+    } else {
+        alert('Please fill in both name and comment fields.');
+    }
+}
+
+        function displayComment(commentData) {
+    const commentsSection = document.getElementById('comments');
+    const newComment = document.createElement('div');
+    newComment.className = 'comment';
+
+    // Array of random logo URLs
+    const logos = [
+        'https://via.placeholder.com/40/FF5733/FFFFFF?text=A', // Example logo 1
+        'https://via.placeholder.com/40/33FF57/FFFFFF?text=B', // Example logo 2
+        'https://via.placeholder.com/40/5733FF/FFFFFF?text=C', // Example logo 3
+        'https://via.placeholder.com/40/FF33F6/FFFFFF?text=D', // Example logo 4
+        'https://via.placeholder.com/40/33D1FF/FFFFFF?text=E'  // Example logo 5
+    ];
+
+    // Get a random index to select a logo
+    const randomLogo = logos[Math.floor(Math.random() * logos.length)];
+
+    newComment.innerHTML = `
+        <img src="${randomLogo}" alt="User Avatar">
+        <div class="comment-content">
+            <strong>${commentData.name}</strong>
+            <p>${commentData.message}</p>
+        </div>
+    `;
+
+    // Insert the new comment at the beginning of the comments section
+    commentsSection.insertBefore(newComment, commentsSection.firstChild);
+}
+
+async function loadComments() {
+    const postId = document.getElementById('postId').value;
+
+    // Fetch existing comments from the backend
+    const response = await fetch(`http://localhost:5000/comments?postId=${postId}`);
+    if (response.ok) {
+        const comments = await response.json();
+        const commentCount = document.getElementById('comment-count');
+        commentCount.textContent = comments.length;
+
+        comments.forEach(displayComment);
+    } else {
+        console.error('Failed to load comments.');
+    }
+}
+
+// Load existing comments when the page loads
+document.addEventListener('DOMContentLoaded', loadComments);
+
+        // Load existing comments when the page loads
+        document.addEventListener('DOMContentLoaded', loadComments);
+    </script>
+</body>
+</html>

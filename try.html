@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Cool Blog Section</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #000;
+            --text-color: #fff;
+            --accent-color: rgba(255, 255, 255, 0.1);
+            --hover-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .blog-section {
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .title-container {
+            position: relative;
+            height: 100px;
+            margin-bottom: 3rem;
+            overflow: hidden;
+        }
+
+        .title {
+            font-size: 3rem;
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin: 0;
+        }
+
+        .title-span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(50px) rotate(10deg);
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .blog-card {
+            background-color: var(--accent-color);
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease;
+        }
+
+        .blog-content {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .blog-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .blog-date {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 1rem;
+        }
+
+        .blog-excerpt {
+            font-size: 1rem;
+            line-height: 1.6;
+            max-height: 4.8em;
+            overflow: hidden;
+        }
+
+        .read-more {
+            display: inline-block;
+            margin-top: 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .read-more::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, right 0.3s;
+        }
+
+        .blog-card:hover .read-more::after {
+            opacity: 1;
+            right: -25px;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background-color: var(--text-color);
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+
+        @media (max-width: 768px) {
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="blog-section">
+        <p class="hello-world">&lt;Hello, world&gt;</p>
+        <div class="title-container">
+            <h1 class="title">
+               Thought Waves
+            </h1>
+        </div>
+        <div class="blog-grid" id="blogGrid"></div>
+    </section>
+    <div class="particles" id="particles"></div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        const blogPosts = [
+            { id: 1, title: 'The Future of Web Development', date: '2023-05-15', excerpt: 'Exploring upcoming trends and technologies in web development. From AI-driven design to WebAssembly, the landscape is evolving rapidly.' },
+            { id: 2, title: 'Mastering React Hooks', date: '2023-06-02', excerpt: 'A deep dive into React Hooks and how to use them effectively. Learn to manage state and side effects with ease in your functional components.' },
+            { id: 3, title: 'CSS Grid vs Flexbox', date: '2023-06-20', excerpt: 'Comparing two powerful layout systems in CSS. Understand when to use Grid for two-dimensional layouts and Flexbox for one-dimensional content flow.' },
+        ];
+
+        const blogGrid = document.getElementById('blogGrid');
+
+        function createBlogCard(post) {
+            const card = document.createElement('div');
+            card.className = 'blog-card';
+            card.innerHTML = `
+                <div class="blog-content">
+                    <h2 class="blog-title">${post.title}</h2>
+                    <p class="blog-date">${post.date}</p>
+                    <p class="blog-excerpt">${post.excerpt}</p>
+                    <a href="#" class="read-more">Read More</a>
+                </div>
+            `;
+            return card;
+        }
+
+        function animateTitle() {
+            gsap.to('.title-span', {
+                opacity: 1,
+                y: 0,
+                rotation: 0,
+                stagger: 0.1,
+                ease: "elastic.out(1, 0.3)",
+                duration: 1
+            });
+        }
+
+        function init() {
+            blogPosts.forEach(post => {
+                const card = createBlogCard(post);
+                blogGrid.appendChild(card);
+
+                card.addEventListener('mouseenter', () => {
+                    gsap.to(card, {
+                        scale: 1.05,
+                        rotation: 2,
+                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                        boxShadow: '0 10px 20px rgba(255, 255, 255, 0.1)',
+                        duration: 0.3
+                    });
+
+                    gsap.to(card.querySelector('.blog-title'), {
+                        y: -5,
+                        color: '#fff',
+                        duration: 0.3
+                    });
+
+                    gsap.to(card.querySelector('.blog-excerpt'), {
+                        maxHeight: '9.6em',
+                        duration: 0.5
+                    });
+
+                    gsap.to(card.querySelector('.read-more'), {
+                        x: 5,
+                        duration: 0.3
+                    });
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    gsap.to(card, {
+                        scale: 1,
+                        rotation: 0,
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        boxShadow: 'none',
+                        duration: 0.3
+                    });
+
+                    gsap.to(card.querySelector('.blog-title'), {
+                        y: 0,
+                        color: '#fff',
+                        duration: 0.3
+                    });
+
+                    gsap.to(card.querySelector('.blog-excerpt'), {
+                        maxHeight: '4.8em',
+                        duration: 0.5
+                    });
+
+                    gsap.to(card.querySelector('.read-more'), {
+                        x: 0,
+                        duration: 0.3
+                    });
+                });
+            });
+
+            animateTitle();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
